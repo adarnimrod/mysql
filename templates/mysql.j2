@@ -1,0 +1,2 @@
+#!/bin/sh -e
+mysqldump --user root --password {{ mysql_root_password }} --single-transaction --force {{ mysql_database }} > /var/backups/mysql_{{ mysql_database }}.sql

@@ -1,2 +1,46 @@
 ---
 # tasks file for ansible-mysql
+
+- name: Preseed
+  debconf:
+    name: mysql-server-5.5
+    question: '{{ item }}'
+    vtype: password
+    value: '{{ mysql_root_password }}'
+  with_items:
+    - mysql-server/root_password
+    - mysql-server/root_password_again
+
+- name: apt install
+  apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+    - mysql-server-5.5
+    - mysql-client-5.5
+    - python-mysqldb
+    - cron
+
+- name: Create database
+  mysql_db:
+    collation: utf8_general_ci
+    encoding: utf8
+    name: '{{ mysql_database }}'
+    state: present
+
+- name: Create account
+  mysql_user:
+    name: '{{ mysql_user }}'
+    password: '{{ mysql_password }}'
+    priv: '{{ mysql_database }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,INDEX'
+    state: present
+
+- name: Add daily backup job
+  template:
+    src: mysql.j2
+    dest: '/etc/cron.daily/mysql_{{ mysql_database }}'
+    owner: root
+    group: root
+    mode: '0700'
