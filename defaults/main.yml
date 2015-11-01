@@ -1,2 +1,4 @@
 ---
 # defaults file for ansible-mysql
+
+mysql_root_password: '{{ lookup("password", "mysql_root_password") }}'
