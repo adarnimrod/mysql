@@ -2,6 +2,7 @@
 # tasks file for ansible-mysql
 
 - name: Preseed
+  when: mysql_root_password is defined
   debconf:
     name: mysql-server-5.5
     question: '{{ item }}'
@@ -22,26 +23,6 @@
     - mysql-client-5.5
     - python-mysqldb
     - cron
-
-- name: Create database
-  when: mysql_database is defined
-  mysql_db:
-    login_user: root
-    login_password: '{{ mysql_root_password }}'
-    collation: utf8_general_ci
-    encoding: utf8
-    name: '{{ mysql_database }}'
-    state: present
-
-- name: Create account
-  when: mysql_user is defined and mysql_database is defined
-  mysql_user:
-    login_user: root
-    login_password: '{{ mysql_root_password }}'
-    name: '{{ mysql_user }}'
-    password: '{{ mysql_password|default(omit) }}'
-    priv: '{{ mysql_database }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,INDEX'
-    state: present
 
 - name: Add daily backup job
   copy:
