@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible-mysql
 
-- name: Preseed
+- name: Preseed (always changes)
   when: mysql_root_password is defined
   debconf:
     name: mysql-server-5.5
