@@ -42,3 +42,4 @@ TODO
 
 - Output log to syslog.
 - Collectd metrics.
+- TLS connection.
