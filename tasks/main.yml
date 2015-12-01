@@ -11,6 +11,7 @@
   with_items:
     - mysql-server/root_password
     - mysql-server/root_password_again
+  register: mysql_debconf
 
 - name: apt install
   apt:
@@ -23,6 +24,10 @@
     - mysql-client-5.5
     - python-mysqldb
     - cron
+
+- name: Reconfigure (if needed)
+  when: mysql_debconf.changed
+  command: /usr/sbin/dpkg-reconfigure --frontend noninteractive mysql-server-5.5
 
 - name: Add daily backup job
   copy:
