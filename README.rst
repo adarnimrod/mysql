@@ -43,3 +43,7 @@ TODO
 - Output log to syslog.
 - Collectd metrics.
 - TLS connection.
+- Don't set a password for the root account, it's only accessible from the
+  machine itself. Instead create an admin account, without root priviliges and
+  with mandatory SSL for connecting. Also, other roles will set mandatory SSL
+  for their connections.
