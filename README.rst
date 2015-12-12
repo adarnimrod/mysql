@@ -1,41 +1,61 @@
-Role Name
-=========
+ansible-mysql
+#############
 
-A brief description of the role goes here.
+An Ansible role to install and configure a MySQL server. The role creates an
+admin account, force SSL usage, configures UFW and daily backup.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Debian Wheezy or later (Ubuntu Precise or later should probably work, but it's
+untested).
 
 Role Variables
 --------------
+::
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+    mysql_admin_password: #The password for the admin account.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+`Common role <https://www.shore.co.il/cgit/ansible-common/>`_
 
 Example Playbook
 ----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+::
 
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+      - role: mysql
+        mysql_admin_password: qwerty123
+
+Example requirements.yml
+------------------------
+::
+
+    - src: https://www.shore.co.il/cgit/ansible-common
+      scm: git
+      path: roles/
+      name: common
+
+    - src: https://www.shore.co.il/cgit/ansible-mysql
+      scm: git
+      path: roles/
+      name: mysql
 
 License
 -------
 
-BSD
+This software is licnesed under the MIT licese (see the ``LICENSE.txt`` file).
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Nimrod Adar, `contact me <nimrod@shore.co.il>`_ or visit my `website
+<https://www.shore.co.il/>`_. Patches are welcome via `git send-email
+<http://git-scm.com/book/en/v2/Git-Commands-Email>`_. The repository is located
+at: https://www.shore.co.il/cgit/.
 
 TODO
 ----

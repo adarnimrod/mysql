@@ -1,18 +1,6 @@
 ---
 # tasks file for ansible-mysql
 
-- name: Preseed (always changes)
-  when: mysql_root_password is defined
-  debconf:
-    name: mysql-server-5.5
-    question: '{{ item }}'
-    vtype: password
-    value: '{{ mysql_root_password }}'
-  with_items:
-    - mysql-server/root_password
-    - mysql-server/root_password_again
-  register: mysql_debconf
-
 - name: apt install
   apt:
     name: '{{ item }}'
@@ -20,14 +8,68 @@
     update_cache: yes
     cache_valid_time: 3600
   with_items:
-    - mysql-server-5.5
-    - mysql-client-5.5
+    - mysql-server
+    - mysql-client
     - python-mysqldb
     - cron
 
-- name: Reconfigure (if needed)
-  when: mysql_debconf.changed
-  command: /usr/sbin/dpkg-reconfigure --frontend noninteractive mysql-server-5.5
+- name: Allow MySQL access to the TLS cert and key
+  user:
+    append: yes
+    groups: ssl-cert
+    name: mysql
+  notify:
+    - Restart MySQL
+
+- name: Configure
+  with_dict:
+    'ssl-ca': /etc/ssl/certs/ca-certificates.crt
+    'ssl-cert': '{{ tls_cert_path }}'
+    'ssl-key': '{{ tls_key_path }}'
+    'bind-address': '0.0.0.0'
+  ini_file:
+    dest: /etc/mysql/my.cnf
+    owner: root
+    group: root
+    mode: '0644'
+    section: mysqld
+    option: '{{ item.key }}'
+    value: '{{ item.value }}'
+  notify:
+  - Restart MySQL
+
+- name: Log to syslog
+  lineinfile:
+    dest: /etc/mysql/my.cnf
+    owner: root
+    group: root
+    mode: '0644'
+    line: 'syslog'
+    insertafter: '[mysqld_safe]'
+  notify:
+  - Restart MySQL
+
+- name: Add admin account
+  mysql_user:
+    name: admin
+    host: '%'
+    password: '{{ mysql_admin_password }}'
+    priv: '*.*:ALL,GRANT'
+    state: present
+
+- name: Require SSL for admin account
+  mysql_user:
+    name: admin
+    host: '%'
+    append_privs: True
+    priv: '*.*:REQUIRESSL'
+    state: present
+
+- name: Allow MySQL in firewall
+  ufw:
+    rule: allow
+    port: 3306
+    proto: tcp
 
 - name: Add daily backup job
   copy:
@@ -36,3 +78,11 @@
     owner: root
     group: root
     mode: '0755'
+
+- meta: flush_handlers
+
+- name: Wait for service to come online
+  wait_for:
+    host: '{{ ansible_default_ipv4["address"] }}'
+    port: 3306
+    state: started
