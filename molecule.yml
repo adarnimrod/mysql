@@ -1,0 +1,26 @@
+---
+ansible:
+  verbose: v
+  playbook: tests/playbook.yml
+  diff: True
+
+molecule:
+  testinfra_dir: tests
+  ansible_config_template: ansible.cfg
+
+vagrant:
+  providers:
+  - name: virtualbox
+    type: virtualbox
+  platforms:
+  - name: openbsd
+    box: kaorimatz/openbsd-5.9-amd64
+  instances:
+  - name: ansible-role-example
+    options:
+        append_platform_to_hostname: yes
+  raw_config_args:
+  - 'vm.synced_folder ".", "/vagrant", disabled: true'
+  - 'vbguest.auto_update = false'
+  - 'landrush.enabled = false'
+  - 'landrush_ip.override = false'

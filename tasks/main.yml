@@ -1,5 +1,9 @@
 ---
-# tasks file for ansible-mysql
+# tasks file for ansible-role-mysql
+- assert:
+    that:
+        - ansible_os_family == 'OpenBSD'
+        - ansible_distribution_release == '5.9'
 
 - name: apt install
   apt:

@@ -1,5 +1,5 @@
-ansible-mysql
-#############
+MySQL
+#####
 
 An Ansible role to install and configure a MySQL server. The role creates an
 admin account, force SSL usage, configures UFW and daily backup.
@@ -7,47 +7,43 @@ admin account, force SSL usage, configures UFW and daily backup.
 Requirements
 ------------
 
-Debian Wheezy or later (Ubuntu Precise or later should probably work, but it's
-untested).
+See :code:`meta/main.yml` and assertions at top of :code:`tasks/main.yml`.
 
 Role Variables
 --------------
-::
 
-    mysql_admin_password: #The password for the admin account.
+See :code:`defaults/main.yml`.
 
 Dependencies
 ------------
 
-`Common role <https://www.shore.co.il/cgit/ansible-common/>`_
+See :code:`meta/main.yml`.
 
 Example Playbook
 ----------------
-::
 
-    - hosts: servers
-      roles:
-      - role: mysql
-        mysql_admin_password: qwerty123
+See :code:`tests/playbook.yml`.
 
-Example requirements.yml
-------------------------
-::
+Testing
+-------
 
-    - src: https://www.shore.co.il/cgit/ansible-common
-      scm: git
-      path: roles/
-      name: common
+To install the dependencies:
 
-    - src: https://www.shore.co.il/cgit/ansible-mysql
-      scm: git
-      path: roles/
-      name: mysql
+.. code:: shell
+
+    ansible-galaxy install git+file://$(pwd),$(git rev-parse --abbrev-ref HEAD) -p .molecule/roles
+
+To run the full test suite:
+
+.. code:: shell
+
+    molecule test
 
 License
 -------
 
-This software is licnesed under the MIT licese (see the ``LICENSE.txt`` file).
+This software is licensed under the MIT license (see the :code:`LICENSE.txt`
+file).
 
 Author Information
 ------------------
@@ -55,12 +51,4 @@ Author Information
 Nimrod Adar, `contact me <nimrod@shore.co.il>`_ or visit my `website
 <https://www.shore.co.il/>`_. Patches are welcome via `git send-email
 <http://git-scm.com/book/en/v2/Git-Commands-Email>`_. The repository is located
-at: https://www.shore.co.il/cgit/.
-
-TODO
-----
-
-- Don't set a password for the root account, it's only accessible from the
-  machine itself. Instead create an admin account, without root priviliges and
-  with mandatory SSL for connecting. Also, other roles will set mandatory SSL
-  for their connections.
+at: https://www.shore.co.il/git/.

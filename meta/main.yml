@@ -4,7 +4,7 @@ galaxy_info:
   description: MySQL role. For more information read the README file.
   company: Shore technologies
   license: MIT
-  min_ansible_version: 1.9
+  min_ansible_version: 2.0
   platforms:
   - name: Debian
     versions:
@@ -14,7 +14,7 @@ galaxy_info:
     versions:
     - precise
     - trusty
-  categories:
-    - database
 dependencies:
-- role: common
+    - src: https://www.shore.co.il/git/ansible-role-ca-store
+      scm: git
+      name: ca-store
