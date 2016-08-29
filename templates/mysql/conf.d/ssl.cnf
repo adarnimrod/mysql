@@ -1,0 +1,6 @@
+[mysqld]
+ssl-ca = /etc/ssl/certs/ca-certificates.crt
+{% if mysql_tls_cert is defined and mysql_tls_key is defined %}
+ssl-cert = {{ mysql_tls_cert }}
+ssl-key = {{ mysql_tls_key }}
+{% endif %}

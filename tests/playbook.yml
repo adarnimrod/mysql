@@ -1,5 +1,8 @@
 ---
 - hosts: all
-  gather_facts: false
+  vars:
+      mysql_root_password: qwer12345
+      mysql_backup_password: backup
+      mysql_admin_password: admin
   roles:
-    - role: ansible-role-example
+    - role: ansible-role-mysql

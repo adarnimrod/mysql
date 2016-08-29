@@ -1,0 +1,3 @@
+[mysqld]
+binlog-ignore-db = information_schema, performance_schema, mysql
+replicate-ignore-db = information_schema, performance_schema, mysql

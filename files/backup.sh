@@ -1,21 +1,19 @@
-#!/bin/sh -e
-# Back up all databases, each to a seperate file.
+#!/bin/sh
+set -eu
 
-backup() {
-    mysqldump --defaults-file=/etc/mysql/debian.cnf \
-        --single-transaction \
-        --force \
-        --result-file=/var/backups/mysql_$1.sql $1
-}
+echo "MySQL backup: Starting at $(date -u)."
 
-# TODO: Find a way to remove table formatting from this command.
-#alias show='mysqlshow --defaults-file=/etc/mysql/debian.cnf'
-alias show="mysql --defaults-file=/etc/mysql/debian.cnf -e 'show databases;'"
+# Grep filter to remove heading and internal MySQL databases.
+filter='Database\|information_schema\|performance_schema\|mysql'
 
-# The reason for dropping the first 4 lines is that the first line is the
-# heading and 3 following lines are databases internal to MySQL and thus their
-# backup is not needed.
-for database in $(show | tail -n+5)
-do
-    backup $database
-done
+if databases="$(mysql --defaults-file=/etc/mysql/mysqldump.cnf \
+                      --execute 'show databases;' | grep -vx $filter)"
+then
+    mysqldump --defaults-file=/etc/mysql/mysqldump.cnf
+              --databases $databases || \
+    echo "MySQL backup: Failed to backup."
+else
+    echo "MySQL backup: No databases to backup."
+fi
+
+echo "MySQL backup: Finished at $(date -u)."

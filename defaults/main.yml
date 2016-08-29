@@ -2,3 +2,7 @@
 # defaults file for ansible-role-mysql
 
 mysql_admin_password:
+mysql_tls_key: /etc/ssl/private/ssl-cert-snakeoil.key
+mysql_tls_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
+mysql_mail_alias: root
+mysql_serverid: '{{ ansible_default_ipv4["address"]|ipaddr("int") }}'

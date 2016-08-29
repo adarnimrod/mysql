@@ -2,91 +2,87 @@
 # tasks file for ansible-role-mysql
 - assert:
     that:
-        - ansible_os_family == 'OpenBSD'
-        - ansible_distribution_release == '5.9'
+        - ansible_os_family == 'Debian'
+        - ansible_distribution_release in ['wheezy', 'jessie', 'stretch', 'precise', 'trusty', 'xenial']
 
-- name: apt install
+- name: Get groups
+  getent:
+      database: group
+
+- name: Preseed root password
+  when: mysql_root_password is defined
+  with_items:
+      - root_password
+      - root_password_again
+  debconf:
+      name: '{{ mysql_server_package }}'
+      question: 'mysql-server/{{ item }}'
+      vtype: password
+      value: '{{ mysql_root_password }}'
+  changed_when: False # Can't verify previous password therefore there's always
+                      # a change, explicitly disable that.
+
+- name: APT install
+  with_items:
+      - mysql-server
+      - mysql-client
+      - python-mysqldb
   apt:
     name: '{{ item }}'
     state: present
     update_cache: yes
     cache_valid_time: 3600
-  with_items:
-    - mysql-server
-    - mysql-client
-    - python-mysqldb
-    - cron
+
+- name: Reconfigure package in case root password was changed
+  changed_when: False
+  command: 'dpkg-reconfigure --frontend noninteractive {{ mysql_server_package }}'
 
 - name: Allow MySQL access to the TLS cert and key
+  when: "'ssl-cert' in getent_group"
   user:
     append: yes
     groups: ssl-cert
     name: mysql
   notify:
-    - Restart MySQL
+      - Restart MySQL
 
-- name: Configure
-  with_dict:
-    'ssl-ca': /etc/ssl/certs/ca-certificates.crt
-    'ssl-cert': '{{ tls_cert_path }}'
-    'ssl-key': '{{ tls_key_path }}'
-    'bind-address': '0.0.0.0'
-  ini_file:
-    dest: /etc/mysql/my.cnf
-    owner: root
-    group: root
-    mode: '0644'
-    section: mysqld
-    option: '{{ item.key }}'
-    value: '{{ item.value }}'
-  notify:
-  - Restart MySQL
-
-- name: Log to syslog
+- name: Alias mail
+  when: mysql_mail_alias is defined
   lineinfile:
-    dest: /etc/mysql/my.cnf
-    owner: root
-    group: root
-    mode: '0644'
-    line: 'syslog'
-    insertafter: '[mysqld_safe]'
-  notify:
-  - Restart MySQL
+      dest: /etc/aliases
+      create: True
+      line: 'mysql: {{ mysql_mail_alias }}'
+      regexp: 'mysql:'
+      state: present
 
 - name: Add admin account
+  when: mysql_admin_password is defined
   mysql_user:
     name: admin
     host: '%'
     password: '{{ mysql_admin_password }}'
-    priv: '*.*:ALL,GRANT'
+    priv: '*.*:ALL,GRANT,REQUIRESSL'
+    login_password: '{{ mysql_root_password|default(omit) }}'
     state: present
 
-- name: Require SSL for admin account
-  mysql_user:
-    name: admin
-    host: '%'
-    append_privs: True
-    priv: '*.*:REQUIRESSL'
-    state: present
-
-- name: Allow MySQL in firewall
-  ufw:
-    rule: allow
-    port: 3306
-    proto: tcp
-
-- name: Add daily backup job
-  copy:
-    src: backup.sh
-    dest: /etc/cron.daily/mysql
-    owner: root
-    group: root
-    mode: '0755'
+- name: Copy configuration templates
+  with_fileglob:
+      - templates/mysql/conf.d/*.cnf
+      - '{{ playbook_dir }}/templates/mysql/conf.d/*.cnf'
+  template:
+      src: '{{ item }}'
+      dest: /etc/mysql/conf.d
+      owner: root
+      group: root
+      mode: 0o0644
+  notify:
+      - Restart MySQL
 
 - meta: flush_handlers
 
 - name: Wait for service to come online
   wait_for:
-    host: '{{ ansible_default_ipv4["address"] }}'
     port: 3306
-    state: started
+
+- include: backup.yml
+  when: mysql_backup_password is defined

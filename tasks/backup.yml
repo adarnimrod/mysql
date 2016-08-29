@@ -1,0 +1,48 @@
+---
+- name: APT install cron
+  apt:
+      name: cron
+      state: present
+      update_cache: yes
+      cache_valid_time: 3600
+
+- name: Add backup account
+  mysql_user:
+    login_password: '{{ mysql_root_password|default(omit) }}'
+    name: backup
+    host: '%'
+    password: '{{ mysql_backup_password }}'
+    priv: '*.*:SELECT,FILE,RELOAD,REPLICATION CLIENT'
+    state: present
+
+- name: Create backup directory
+  file:
+      path: /var/backups/mysql
+      owner: nobody
+      group: nogroup
+      mode: 0o0700
+      state: directory
+
+- name: Copy backup configuration
+  template:
+      src: mysqldump.cnf
+      dest: /etc/mysql/mysqldump.cnf
+      owner: nobody
+      group: nogroup
+      mode: 0o0400
+
+- name: Copy backup job
+  copy:
+    src: backup.sh
+    dest: /usr/local/sbin/mysql-backup
+    owner: root
+    group: root
+    mode: 0o0755
+
+- name: Add daily backup job
+  cron:
+      user: nobody
+      name: MySQL backup
+      job: '/usr/local/sbin/mysql-backup | logger'
+      special_time: daily
+      state: present

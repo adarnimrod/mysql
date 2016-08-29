@@ -14,7 +14,4 @@ galaxy_info:
     versions:
     - precise
     - trusty
-dependencies:
-    - src: https://www.shore.co.il/git/ansible-role-ca-store
-      scm: git
-      name: ca-store
+dependencies: []
