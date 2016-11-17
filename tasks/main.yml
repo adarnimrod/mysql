@@ -68,7 +68,7 @@
 
 - name: Copy configuration templates
   with_fileglob:
-      - templates/mysql/conf.d/*.cnf
+      - '{{ role_path }}/templates/mysql/conf.d/*.cnf'
       - '{{ playbook_dir }}/templates/mysql/conf.d/*.cnf'
   template:
       src: '{{ item }}'
