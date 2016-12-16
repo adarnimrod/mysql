@@ -1,17 +1,19 @@
 ---
 galaxy_info:
   author: Nimrod Adar
-  description: MySQL role. For more information read the README file.
+  description: Provision a MySQL server
   company: Shore technologies
   license: MIT
   min_ansible_version: 2.0
   platforms:
   - name: Debian
     versions:
-    - jessie
     - wheezy
+    - jessie
+    - stretch
   - name: Ubuntu
     versions:
     - precise
     - trusty
+    - xenial
 dependencies: []
