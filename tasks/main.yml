@@ -57,16 +57,6 @@
       regexp: 'mysql:'
       state: present
 
-- name: Add admin account
-  when: mysql_admin_password is defined
-  mysql_user:
-    name: admin
-    host: '%'
-    password: '{{ mysql_admin_password }}'
-    priv: '*.*:ALL,GRANT,REQUIRESSL'
-    login_password: '{{ mysql_root_password|default(omit) }}'
-    state: present
-
 - name: Copy configuration templates
   with_fileglob:
       - '{{ role_path }}/templates/mysql/conf.d/*.cnf'
@@ -80,11 +70,27 @@
   notify:
       - Restart MySQL
 
+- name: Enable service
+  service:
+      name: mysql
+      state: started
+      enabled: yes
+
 - meta: flush_handlers
 
 - name: Wait for service to come online
   wait_for:
     port: 3306
+
+- name: Add admin account
+  when: mysql_admin_password is defined
+  mysql_user:
+    name: admin
+    host: '%'
+    password: '{{ mysql_admin_password }}'
+    priv: '*.*:ALL,GRANT,REQUIRESSL'
+    login_password: '{{ mysql_root_password|default(omit) }}'
+    state: present
 
 - include: backup.yml
   when: mysql_backup_password is defined
