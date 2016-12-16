@@ -2,6 +2,7 @@
 - hosts: all
   strategy: free
   roles:
+    - role: ca-store
     - role: mysql
       mysql_root_password: qwer12345
       mysql_backup_password: backup
