@@ -9,3 +9,8 @@
       mysql_admin_password: admin
       mysql_tls_key: /etc/ssl/private/ssl-cert-snakeoil.key
       mysql_tls_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
+  post_tasks:
+      - name: APT install test utilities
+        apt:
+            name: net-tools
+            state: present
