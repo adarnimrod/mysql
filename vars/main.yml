@@ -1,5 +1,6 @@
 ---
-# vars file for ansible-role-mysql
+# vars file for mysql
+
 mysql_version:
     precise: 5.5
     trusty: 5.5

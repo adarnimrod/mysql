@@ -1,7 +1,10 @@
 ---
 - hosts: all
+  strategy: free
   roles:
-    - role: ansible-role-mysql
+    - role: mysql
       mysql_root_password: qwer12345
       mysql_backup_password: backup
       mysql_admin_password: admin
+      mysql_tls_key: /etc/ssl/private/ssl-cert-snakeoil.key
+      mysql_tls_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem

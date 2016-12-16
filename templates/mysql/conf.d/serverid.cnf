@@ -1,2 +1,4 @@
 [mysqld]
+{% if mysql_serverid is defined %}
 server-id = {{ mysql_serverid }}
+{% endif %}

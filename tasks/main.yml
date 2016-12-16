@@ -1,10 +1,11 @@
 ---
-# tasks file for ansible-role-mysql
+# tasks file for mysql
+
 - name: Assertions
   assert:
     that:
         - ansible_os_family == 'Debian'
-        - ansible_distribution_release in ['wheezy', 'jessie', 'stretch', 'precise', 'trusty', 'xenial']
+        - ansible_distribution_release in mysql_version
 
 - name: Get groups
   getent:

@@ -5,15 +5,19 @@ ansible:
   diff: True
   config_file: ../ansible.cfg
 
+dependency:
+  name: galaxy
+  requirements_file: tests/requirements.yml
+
 vagrant:
   providers:
   - name: virtualbox
     type: virtualbox
   platforms:
-  - name: debian
+  - name: jessie
     box: debian/jessie64
   instances:
-  - name: ansible-role-mysql
+  - name: mysql
     options:
         append_platform_to_hostname: yes
   raw_config_args:
@@ -21,3 +25,17 @@ vagrant:
   - 'vbguest.auto_update = false'
   - 'landrush.enabled = false'
   - 'landrush_ip.override = false'
+
+docker:
+  containers:
+  - name: mysql-jessie
+    image: debian
+    image_version: jessie
+    command: /sbin/init
+    privileged: True
+    volume_mounts:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+    environment:
+        DEBIAN_FRONTEND: noninteractive
+        container: docker
