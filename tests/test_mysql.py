@@ -13,11 +13,11 @@ def test_mysql_service(Service):
 
 
 def test_mysql_alias(File):
-    pass
+    assert File('/etc/aliases').contains('mysql:')
 
 
 def test_mysql_ssl_group(User):
-    pass
+    assert 'ssl-cert' in User('mysql').groups
 
 
 def test_mysql_admin_account(Command, Sudo):
@@ -33,12 +33,22 @@ def test_mysql_backup_account(Command, Sudo):
 
 
 def test_mysql_backup_config(File):
-    pass
+    backup_config = File('/etc/mysql/mysqldump.cnf')
+    assert backup_config.user == 'nobody'
+    assert backup_config.group == 'nogroup'
+    assert backup_config.mode == 0o0400
 
 
 def test_mysql_backup_directory(File):
-    pass
+    backup_dir = File('/var/backups/mysql')
+    assert backup_dir.is_directory
+    assert backup_dir.user == 'nobody'
+    assert backup_dir.group == 'nogroup'
+    assert backup_dir.mode == 0o0700
 
 
 def test_mysql_backup(Command, Sudo):
-    pass
+    with Sudo('nobody'):
+        mysql_backup = Command('mysql-backup')
+    assert mysql_backup.rc == 0
+    assert mysql_backup.stderr == ''
