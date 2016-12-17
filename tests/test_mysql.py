@@ -25,11 +25,14 @@ def test_mysql_admin_account(Command, Sudo):
 
 
 def test_mysql_backup_job(Command, Sudo):
-    pass
+    with Sudo('nobody'):
+        'mysql-backup' in Command('crontab -l').stdout
 
 
 def test_mysql_backup_account(Command, Sudo):
-    pass
+    with Sudo():
+        'localhost' in Command(
+            '''mysql --defaults-file=/etc/mysql/debian.cnf --database mysql --execute 'select Host from user where User="backup"' ''').stdout  # noqa: E501
 
 
 def test_mysql_backup_config(File):
@@ -37,6 +40,7 @@ def test_mysql_backup_config(File):
     assert backup_config.user == 'nobody'
     assert backup_config.group == 'nogroup'
     assert backup_config.mode == 0o0400
+    assert backup_config.contains('user = backup')
 
 
 def test_mysql_backup_directory(File):
