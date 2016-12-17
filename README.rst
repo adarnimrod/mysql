@@ -67,4 +67,6 @@ at: https://www.shore.co.il/git/.
 TODO
 ----
 
-- Testing.
+- More thorough, applicative tests.
+- A backup script that saves each database in its own file but in a single
+  transaction without locking.

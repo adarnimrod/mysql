@@ -21,7 +21,9 @@ def test_mysql_ssl_group(User):
 
 
 def test_mysql_admin_account(Command, Sudo):
-    pass
+    with Sudo():
+        'localhost' in Command(
+            '''mysql --defaults-file=/etc/mysql/debian.cnf --database mysql --execute 'select Host from user where User="admin"' ''').stdout  # noqa: E501
 
 
 def test_mysql_backup_job(Command, Sudo):
