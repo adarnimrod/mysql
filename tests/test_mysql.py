@@ -58,3 +58,8 @@ def test_mysql_backup(Command, Sudo):
         mysql_backup = Command('mysql-backup')
     assert mysql_backup.rc == 0
     assert mysql_backup.stderr == ''
+
+
+def test_mysql_config(Command, Sudo):
+    with Sudo('mysql'):
+        assert Command('mysqld --help --verbose').rc == 0
