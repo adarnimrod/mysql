@@ -67,9 +67,12 @@
       owner: root
       group: root
       mode: 0o0644
-      validate: mysqld --help --verbose
   notify:
       - Restart MySQL
+
+- name: Validate config
+  command: mysqld --help --verbose
+  changed_when: False
 
 - name: Enable service
   service:
