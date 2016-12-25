@@ -67,6 +67,7 @@
       owner: root
       group: root
       mode: 0o0644
+      validate: mysqld --help --verbose
   notify:
       - Restart MySQL
 
