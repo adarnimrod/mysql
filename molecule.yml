@@ -5,6 +5,10 @@ ansible:
   diff: True
   config_file: ../ansible.cfg
 
+molecule:
+  ignore_paths:
+  - .tox
+
 dependency:
   name: galaxy
   requirements_file: tests/requirements.yml
@@ -13,29 +17,35 @@ vagrant:
   providers:
   - name: virtualbox
     type: virtualbox
+    options:
+        cpus: 1
   platforms:
+  - name: openbsd60
+    box: fnichol/openbsd-6.0-i386
+  - name: xenial
+    box: ubuntu/xenial32
+  - name: trusty
+    box: ubuntu/trusty32
+  - name: precise
+    box: hashicorp/precise32
+  - name: stretch
+    box: koalephant/debian9-i386
   - name: jessie
-    box: debian/jessie64
+    box: deb/jessie-i386
+  - name: wheezy
+    box: bmorg/debian-wheezy-i386
   instances:
   - name: mysql
     options:
         append_platform_to_hostname: yes
   raw_config_args:
+  - 'vm.boot_timeout = 600'
   - 'vm.synced_folder ".", "/vagrant", disabled: true'
-  - 'vbguest.auto_update = false'
-  - 'landrush.enabled = false'
-  - 'landrush_ip.override = false'
-
-docker:
-  containers:
-  - name: mysql-jessie
-    image: debian
-    image_version: jessie
-    command: /sbin/init
-    privileged: True
-    volume_mounts:
-      - /sys/fs/cgroup:/sys/fs/cgroup
-      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
-    environment:
-        DEBIAN_FRONTEND: noninteractive
-        container: docker
+  - 'vbguest.auto_update = false if Vagrant.has_plugin?("vbguest")'
+  - 'landrush.enabled = false if Vagrant.has_plugin?("landrush")'
+  - 'landrush_ip.override = false if Vagrant.has_plugin?("landrush")'
+  - |
+      vm.provider "virtualbox" do |v|
+        v.customize "pre-boot", ["modifyvm", :id, "--hwvirtex", ENV['VBOX_HWVIRTEX']] if ENV.has_key?('VBOX_HWVIRTEX')
+        v.memory = ENV['VBOX_MEMORY'].to_i if ENV.has_key?('VBOX_MEMORY')
+      end

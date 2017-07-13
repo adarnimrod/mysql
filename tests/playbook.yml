@@ -1,6 +1,23 @@
 ---
+- hosts: mysql-openbsd*
+  gather_facts: false
+  roles:
+      - openbsd-bootstrap
+      - role: users
+        users: []
+        users_use_sudo: True
+        users_lock_root_ssh: False
+
+- hosts: [mysql-xenial, mysql-wheezy]
+  gather_facts: false
+  roles:
+      - debian-bootstrap
+      - role: users
+        users: []
+        users_use_sudo: True
+        users_lock_root_ssh: False
+
 - hosts: all
-  strategy: free
   roles:
     - role: ca-store
     - role: mysql
