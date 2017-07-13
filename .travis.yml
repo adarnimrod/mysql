@@ -9,7 +9,6 @@ env:
         - VBOX_MEMORY=2048
         - VBOX_HWVIRTEX=off
     matrix:
-        - TOXENV=openbsd60
         - TOXENV=xenial
         - TOXENV=trusty
         - TOXENV=precise
